@@ -1,1 +1,1 @@
-# dia
+Digital Image Analysis - Course Projects
