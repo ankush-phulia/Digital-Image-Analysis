@@ -42,7 +42,8 @@ def manualScale(image, scale_x, scale_y):
     x_in, y_in = image.shape[0], image.shape[1]
     x_out, y_out = int(x_in * scale_x), int(y_in * scale_y)
     scaled_image = np.empty((x_out, y_out, image.shape[2]), dtype=np.uint8)
-    inv_scale_x, inv_scale_y = float(x_in) / float(x_out), float(y_in) / float(y_out)
+    inv_scale_x, inv_scale_y = float(
+        x_in) / float(x_out), float(y_in) / float(y_out)
 
     for i in xrange(x_out):
         for j in xrange(y_out):
@@ -58,8 +59,10 @@ def pixelDiffError(libgen_image, manual_image):
 
 
 def Run(**kwargs):
-	# read input
+    # read input and select ROI
     image = cv.imread(kwargs['path'])
+    # roi = cv.selectROI('Choose Area to Zoom', image, fromCenter=False)
+    # image = image[int(roi[1]):int(roi[1]+roi[3]), int(roi[0]):int(roi[0]+roi[2])]
 
     # process image(s)
     libscaled_image = libScale(
