@@ -52,7 +52,9 @@ def faceEnhance(image, minThold = 20, maxThold = 250):
     faces = detectFaces(image)
     skin_mask = detectSkin(image)
     base, detail = Filter(image)
-    cv.imshow('base', base); cv.imshow('detail', detail)
+    # cv.imshow('base', base); cv.imshow('detail', detail)
+    ksize = 30
+    sigma = 10
 
     for face in faces:
         # get the actual face
@@ -64,10 +66,12 @@ def faceEnhance(image, minThold = 20, maxThold = 250):
         skin_c = cv.cvtColor(skin, cv.COLOR_BGR2HSV)
 
         # histogram of intensities
-        hist = cv.calcHist(skin_c, [2], None, [maxThold], [minThold, maxThold])
+        hist = cv.calcHist(skin_c, [2], None, [maxThold], [minThold, maxThold]).T.ravel()
+        h = np.correlate(hist, cv.getGaussianKernel(ksize,sigma).ravel(), 'same')
         
+        print h
         from matplotlib import pyplot as plt
-        plt.plot(hist)
+        plt.plot(h)
         plt.show() 
         cv.waitKey(0)
 
