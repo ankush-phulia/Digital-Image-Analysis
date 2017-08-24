@@ -44,7 +44,7 @@ def Filter(image):
     return base, detail
 
 
-def faceEnhance(image):
+def faceEnhance(image, minThold = 20, maxThold = 250):
     '''
     Implement side-lit correction and underexposure
     '''
@@ -52,6 +52,7 @@ def faceEnhance(image):
     faces = detectFaces(image)
     skin_mask = detectSkin(image)
     base, detail = Filter(image)
+    cv.imshow('base', base); cv.imshow('detail', detail)
 
     for face in faces:
         # get the actual face
@@ -63,7 +64,7 @@ def faceEnhance(image):
         skin_c = cv.cvtColor(skin, cv.COLOR_BGR2HSV)
 
         # histogram of intensities
-        hist = cv.calcHist(skin_c, [2], None, [200], [1, 200])
+        hist = cv.calcHist(skin_c, [2], None, [maxThold], [minThold, maxThold])
         
         from matplotlib import pyplot as plt
         plt.plot(hist)
