@@ -21,7 +21,7 @@ def detectSkin(image):
     From pyimagesearch
     '''
     # skin hsv pixel limits
-    lower = np.array([0, 48, 80], dtype="uint8")
+    lower = np.array([0, 24, 25], dtype="uint8")
     upper = np.array([20, 255, 255], dtype="uint8")
 
     # convert rgb to hsv - hue, saturation, value
@@ -98,10 +98,18 @@ def SidelightCorrect(x, y, w, h, skin_c, Iout, smooth_ksize=30, smooth_sigma=10)
         hist,
         cv.getGaussianKernel(smooth_ksize, smooth_sigma).ravel(),
         'same')
+
+    # from matplotlib import pyplot as plt
+    # plt.plot(hist)
+    # plt.show()
+
     f, m = BiModal(hist)
-    # mask for skin pixels < thold
+    # mask for skin pixels < thol - create adjustment map A
     mask = (gMinThold < skin_c[:, :, 2]) & (skin_c[:, :, 2] < m)
-    return np.uint8(Iout[y:y + h, x:x + h][mask] * f), mask
+    A = np.ones((Iout.shape), dtype=np.uint8)
+    A[y:y + h, x:x + h][mask] = f
+    # EACP on A
+    return A
 
 
 def faceEnhance(image):
@@ -112,8 +120,7 @@ def faceEnhance(image):
     faces = detectFaces(image)
     skin_mask = detectSkin(image)
     base, detail = Filter(image)
-    cv.imshow('tets', base + detail)
-    Iout = cv.cvtColor(base, cv.COLOR_BGR2HSV)
+    Iout = base
     # cv.imshow('base', base); cv.imshow('detail', detail)
 
     for face in faces:
@@ -129,12 +136,12 @@ def faceEnhance(image):
 
         # side-lit face
         try:
-            value, mask = SidelightCorrect(x, y, w, h, skin_c, Iout)
-            Iout[y:y + h, x:x + h][mask] = value
+            A = SidelightCorrect(x, y, w, h, skin_c, Iout)
+            Iout = np.multiply(Iout, A) + detail
         except:
             print 'Not Sidelit'
-
-        cv.imshow('sidelit', cv.cvtColor(Iout, cv.COLOR_HSV2BGR) + detail)
+        
+        cv.imshow('Sidelight Correction', Iout)
         cv.waitKey(0)
 
 
